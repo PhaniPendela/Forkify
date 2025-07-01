@@ -1,11 +1,13 @@
 import icons from 'url:../../img/icons.svg';
 import fracty from 'fracty';
-import { mark } from 'regenerator-runtime';
 
 class RecipeView {
   #parentEl = document.querySelector('.recipe');
   #data;
+  #errorMessage = 'We could not find that recipe. Please try another one!';
+  #message = '';
   constructor() {}
+
   renderSpinner() {
     const markup = `
         <div class="spinner">
@@ -16,30 +18,48 @@ class RecipeView {
     this.#clear();
     this.#parentEl.insertAdjacentHTML('afterbegin', markup);
   }
+
   render(data) {
     this.#data = data;
     const markup = this.#generateMarkup();
     this.#clear();
     this.#parentEl.insertAdjacentHTML('afterbegin', markup);
   }
+
   addHandlerRender(handler) {
-    [('hashchange', 'load')].forEach(ev =>
+    ['hashchange', 'load'].forEach(ev =>
       window.addEventListener(ev, handler)
     );
   }
-  renderError(message) {
+
+  renderError(message = this.#errorMessage) {
     const markup = `
     <div class="error">
       <div>
         <svg>
-          <use href="${icons}.svg#icon-alert-triangle"></use>
+          <use href="${icons}#icon-alert-triangle"></use>
         </svg>
       </div>
       <p>${message}</p>
     </div>`;
-    this.#clear;
+    this.#clear();
     this.#parentEl.insertAdjacentHTML('afterbegin', markup);
   }
+
+  renderMessage(message = this.#message) {
+    const markup = `
+    <div class="message">
+      <div>
+        <svg>
+          <use href="${icons}#icon-smile"></use>
+        </svg>
+      </div>
+      <p>${message}</p>
+    </div>`;
+    this.#clear();
+    this.#parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
+
   #generateMarkup() {
     return `
         <figure class="recipe__fig">
@@ -125,9 +145,11 @@ class RecipeView {
         </div>
         `;
   }
+
   #clear() {
     this.#parentEl.innerHTML = '';
   }
+
   #generateIngredients() {
     return this.#data.ingredients
       .map(

@@ -1,5 +1,7 @@
 import * as model from './model.js';
 import recipeView from './views/recipeView.js';
+import searchResultsView from './views/searchResultsView.js';
+import searchView from './views/searchView.js';
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
@@ -21,14 +23,30 @@ const controlRecipes = async function () {
     // 2. Rendering Recipe
     recipeView.render(recipe);
   } catch (err) {
-    recipeView.renderError(`${err} 🌟🌟🌟🌟`);
+    recipeView.renderError();
   }
 };
-(() => {
-  recipeView.addHandlerRender(controlRecipes);
-})();
+
+const controlSearchResults = async function (e) {
+  e.preventDefault();
+  try {
+    searchResultsView.renderSpinner();
+    const query = searchView.getQuery();
+    await model.loadSearchResults(query);
+    console.log(model.state.search.results);
+    searchView.clearSearchBar();
+    searchResultsView.render(model.state.search.results);
+  } catch (err) {
+    console.log(err);
+  }
+};
 // const init = function () {
 //   recipeView.addHandlerRender(controlRecipes)
 // };
 // window.addEventListener('load', showRecipe);
 // window.addEventListener('hashchange', showRecipe);
+// IIFE (Init)
+(() => {
+  recipeView.addHandlerRender(controlRecipes);
+  searchView.addHandler(controlSearchResults);
+})();
