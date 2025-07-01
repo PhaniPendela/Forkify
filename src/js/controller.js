@@ -1,10 +1,17 @@
 import * as model from './model.js';
 import recipeView from './views/recipeView.js';
-import searchResultsView from './views/searchResultsView.js';
+// import searchResultsView from './views/searchResultsView.js';
 import searchView from './views/searchView.js';
+import resultsView from './views/resultsView.js';
+import paginationView from './views/paginationView.js';
 
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
+import { RES_PER_PAGE } from './config.js';
+
+if (module.hot) {
+  module.hot.accept();
+}
 
 // NEW API URL (instead of the one shown in the video)
 // https://forkify-api.jonas.io
@@ -27,18 +34,37 @@ const controlRecipes = async function () {
   }
 };
 
-const controlSearchResults = async function (e) {
-  e.preventDefault();
+const controlSearchResults = async function () {
   try {
-    searchResultsView.renderSpinner();
+    // 1. Start to fetch the query
+    resultsView.renderSpinner();
     const query = searchView.getQuery();
+    if (!query) return;
+    // 2. Fectching match results
     await model.loadSearchResults(query);
-    console.log(model.state.search.results);
-    searchView.clearSearchBar();
-    searchResultsView.render(model.state.search.results);
+    // 3. Render them on sidebar
+    renderSideBar();
   } catch (err) {
     console.log(err);
   }
+};
+
+const renderSideBar = function () {
+  const pageData = model.getSearchResultsPage();
+  resultsView.render(pageData);
+  if (pageData.length === 0) return;
+  const { currPage, pageCount } = model.state.search;
+  paginationView.render({ currPage, pageCount });
+};
+
+const nextPage = function () {
+  model.increaseCurrPage();
+  renderSideBar();
+};
+
+const prevPage = function () {
+  model.decreaseCurrPage();
+  renderSideBar();
 };
 // const init = function () {
 //   recipeView.addHandlerRender(controlRecipes)
@@ -48,5 +74,6 @@ const controlSearchResults = async function (e) {
 // IIFE (Init)
 (() => {
   recipeView.addHandlerRender(controlRecipes);
-  searchView.addHandler(controlSearchResults);
+  searchView.addSearchHandler(controlSearchResults);
+  paginationView.addPageHandler(nextPage, prevPage);
 })();

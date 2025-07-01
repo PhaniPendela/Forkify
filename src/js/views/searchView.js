@@ -2,12 +2,17 @@ class SearchView {
   #parentEl = document.querySelector('.search');
   constructor() {}
   getQuery() {
-    return this.#parentEl.querySelector('.search__field').value;
+    const query = this.#parentEl.querySelector('.search__field').value;
+    this.#clearSearchBar();
+    return query;
   }
-  addHandler(handler) {
-    this.#parentEl.addEventListener('submit', handler);
+  addSearchHandler(handler) {
+    this.#parentEl.addEventListener('submit', function (e) {
+      e.preventDefault();
+      handler();
+    });
   }
-  clearSearchBar() {
+  #clearSearchBar() {
     this.#parentEl.querySelector('.search__field').value = '';
     this.#parentEl.querySelector('.search__field').focus();
   }

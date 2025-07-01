@@ -1,4 +1,4 @@
-import { API_URL } from './config.js';
+import { API_URL, RES_PER_PAGE } from './config.js';
 import { getJSON } from './helpers.js';
 const state = {
   recipe: {},
@@ -48,9 +48,35 @@ const loadSearchResults = async function (query) {
     const data = await getJSON(`${API_URL}?search=${query}`);
     state.search.query = query;
     state.search.results = getSearchRecipes(data);
+    state.search.pageCount = Math.ceil(
+      state.search.results.length / RES_PER_PAGE
+    );
+    state.search.currPage = 1;
   } catch (err) {
     throw err;
   }
 };
 
-export { state, loadRecipe, loadSearchResults };
+const getSearchResultsPage = function () {
+  return state.search.results.slice(
+    (state.search.currPage - 1) * RES_PER_PAGE,
+    state.search.currPage * RES_PER_PAGE
+  );
+};
+
+const increaseCurrPage = function () {
+  state.search.currPage++;
+};
+
+const decreaseCurrPage = function () {
+  state.search.currPage--;
+};
+
+export {
+  state,
+  loadRecipe,
+  loadSearchResults,
+  getSearchResultsPage,
+  increaseCurrPage,
+  decreaseCurrPage,
+};
