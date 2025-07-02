@@ -24,6 +24,36 @@ export default class View {
     this._parentEl.insertAdjacentHTML('afterbegin', markup);
   }
 
+  // Don't use this on actual big project only for understanding. :)
+  // Very inefficient
+  update(data) {
+    this._data = data;
+    const newMarkup = this._generateMarkup();
+
+    const newDOM = document.createRange().createContextualFragment(newMarkup);
+    const newElements = [...newDOM.querySelectorAll('*')];
+    const currElements = [...this._parentEl.querySelectorAll('*')];
+    // console.log(newElements);
+    // console.log(currElements);
+
+    newElements.forEach((newEl, i) => {
+      const curEl = currElements[i];
+      // console.log(newE.isEqualNode(curEl));
+      if (
+        !newEl.isEqualNode(curEl) &&
+        newEl.firstChild?.nodeValue.trim() !== ''
+      ) {
+        curEl.textContent = newEl.textContent;
+      }
+
+      if (!newEl.isEqualNode(curEl)) {
+        Array.from(newEl.attributes).forEach(attr =>
+          curEl.setAttribute(attr.name, attr.value)
+        );
+      }
+    });
+  }
+
   renderError(message = this._errorMessage) {
     const markup = `
       <div class="error">
@@ -34,6 +64,20 @@ export default class View {
         </div>
         <p>${message}</p>
       </div>`;
+    this._clear();
+    this._parentEl.insertAdjacentHTML('afterbegin', markup);
+  }
+
+  renderMessage(message = this._message) {
+    const markup = `
+    <div class="message">
+      <div>
+        <svg>
+          <use href="${icons}#icon-smile"></use>
+        </svg>
+      </div>
+      <p>${message}</p>
+    </div>`;
     this._clear();
     this._parentEl.insertAdjacentHTML('afterbegin', markup);
   }

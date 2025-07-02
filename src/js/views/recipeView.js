@@ -5,7 +5,7 @@ import fracty from 'fracty';
 class RecipeView extends View {
   _parentEl = document.querySelector('.recipe');
   _errorMessage = 'We could not find that recipe. Please try another one!';
-  #message = '';
+  _message = '';
   constructor() {
     super();
   }
@@ -14,18 +14,21 @@ class RecipeView extends View {
     ['hashchange', 'load'].forEach(ev => window.addEventListener(ev, handler));
   }
 
-  renderMessage(message = this.#message) {
-    const markup = `
-    <div class="message">
-      <div>
-        <svg>
-          <use href="${icons}#icon-smile"></use>
-        </svg>
-      </div>
-      <p>${message}</p>
-    </div>`;
-    this._clear();
-    this._parentEl.insertAdjacentHTML('afterbegin', markup);
+  addHandlerServings(handler) {
+    this._parentEl.addEventListener('click', function (e) {
+      const btn = e.target.closest('.btn--update-servings');
+      if (!btn) return;
+      const { goto } = btn.dataset;
+      handler(+goto);
+    });
+  }
+
+  addHandlerBookmark(handler) {
+    this._parentEl.addEventListener('click', function (e) {
+      const btn = e.target.closest('.btn--bookmark');
+      if (!btn) return;
+      handler();
+    });
   }
 
   _generateMarkup() {
@@ -59,12 +62,16 @@ class RecipeView extends View {
             <span class="recipe__info-text">servings</span>
 
             <div class="recipe__info-buttons">
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-goto="${
+                this._data.servings - 1 || 1
+              }">
                 <svg>
                   <use href="${icons}#icon-minus-circle"></use>
                 </svg>
               </button>
-              <button class="btn--tiny btn--increase-servings">
+              <button class="btn--tiny btn--update-servings" data-goto="${
+                this._data.servings + 1
+              }">
                 <svg>
                   <use href="${icons}#icon-plus-circle"></use>
                 </svg>
@@ -72,14 +79,16 @@ class RecipeView extends View {
             </div>
           </div>
 
-          <div class="recipe__user-generated">
+          <div class="recipe__user-generated ${this._data.key ? '' : 'hidden'}">
             <svg>
               <use href="${icons}#icon-user"></use>
             </svg>
           </div>
-          <button class="btn--round">
+          <button class="btn--round btn--bookmark">
             <svg class="">
-              <use href="${icons}#icon-bookmark-fill"></use>
+              <use href="${icons}#icon-bookmark${
+      this._data.bookmark ? '-fill' : ''
+    }"></use>
             </svg>
           </button>
         </div>
