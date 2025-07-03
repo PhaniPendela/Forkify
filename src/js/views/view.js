@@ -15,6 +15,13 @@ export default class View {
     this._parentEl.insertAdjacentHTML('afterbegin', markup);
   }
 
+  /**
+   * Render received Object to DOM
+   * @param {Object | Object[]} data The data to be rendered (eg. recipe)
+   * @returns {undefined} Doesn't return anything
+   * @this {Object} View Instance
+   * @author Krishna Chaitanya
+   */
   render(data) {
     if (!data || (Array.isArray(data) && data.length === 0))
       return this.renderError();
